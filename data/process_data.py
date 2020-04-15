@@ -25,7 +25,7 @@ def clean_data(df):
     category_colnames = row
     categories.columns = category_colnames
     for column in categories:
-        #print(categories[column].str.slice().str[-1])
+
         # set each value to be the last character of the string
         categories[column] = categories[column].str.slice().str[-1]
 
@@ -33,6 +33,8 @@ def clean_data(df):
         categories[column] = categories[column].astype(int)
     df = df.drop(['categories'],axis=1)
     df = pd.concat([df,categories],axis=1)
+    # related column has 2 as an entry
+    df = df[df['related'] != 2]
     #remove duplicates
     df = df.drop_duplicates()
     return df
@@ -42,7 +44,7 @@ def save_data(df, database_filename):
     """
     :param df: input Dataframe which will get written to database
     :param database_filename: the name of the database
-    :return:
+    :return: . print statement indicating succesfull saving
     """
     engine = create_engine('sqlite:///'+database_filename)
     df.to_sql('datatable', engine, index=False)

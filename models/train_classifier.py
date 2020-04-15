@@ -11,60 +11,66 @@ import nltk
 nltk.download(['punkt', 'wordnet','stopwords', 'averaged_perceptron_tagger'])
 from nltk.corpus import stopwords
 from sklearn.metrics import confusion_matrix
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
-from sklearn.pipeline import Pipeline
+from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.datasets import make_multilabel_classification
 from sklearn.multioutput import MultiOutputClassifier
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import AdaBoostClassifier
 from sklearn.metrics import classification_report
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 
 def load_data(database_filepath):
+    """
+    :param database_filepath: string of path to database
+    :return: dataframe of the database,
+    - X -> column of messages
+    - Y -> all columns with the 36 categories for prediction
+    """
     engine = create_engine('sqlite:///{}'.format(database_filepath))
-    #conn = sqlite3.connect(database_filepath)
-    #engine = create_engine('sqlite:///{}'.format(database_filepath))
-    
 
     df = pd.read_sql_table('datatable', engine)
-
     X= df['message']
+    Y= df.iloc[:, 4:]
 
-    Y= df.iloc[:, 5:]
-
-    #df = pd.read_sql('SELECT * FROM datatable', engine)
-    #X = df['message']
-    #Y = df.drop(['id','message','original','genre'],axis=1)
 
     return X, Y, df
 
 
+
+
 def tokenize(text):
+    """
+    :param text: input is uncleaned text
+    :return: cleaned text
+    """
     text = re.sub(r"[^a-zA-Z0-9]", " ", text.lower())
     tokens = word_tokenize(text)
     lemmatizer = WordNetLemmatizer()
-    
     stop_words = stopwords.words("english")
     tokens = [lemmatizer.lemmatize(word) for word in tokens if word not in stop_words]
     return tokens
 
 
+    
 def build_model():
+    """
+    call to build_model will create a pipeline for predictionn
+    :return: Gridsearchmodel
+    """
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
           ('tfidf', TfidfTransformer()),
-         ('clf', MultiOutputClassifier(RandomForestClassifier()))
+         ('clf', MultiOutputClassifier(AdaBoostClassifier()))
     ])
     parameters = parameters = {
         'vect__ngram_range': ((1, 1), (1, 2)),
         
-        #'clf__estimator__n_jobs': [1, 2],
-
-        'clf__estimator__min_samples_split': [2, 3],
-
-        'clf__estimator__criterion': ['entropy', 'gini']
+        'vect__max_features': (None, 5000),
+        
+        'clf__estimator__n_estimators':  [50,100],
+    
         
     }
 
@@ -74,9 +80,16 @@ def build_model():
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    """
+    :param model: model we want to evaluate
+    :param X_test: test column with messages used for evaluation
+    :param Y_test: column with classes wanted to predict
+    :param category_names: name of categories
+    :return: print statement with 36 classes
+    """
     modpred = model.predict(X_test)
     for row,col in enumerate(Y_test):
-    
+        
         target = str(Y_test[col].unique())
         target = re.sub(r"[\[\]']", "",target).replace(" ", "")
     
@@ -84,7 +97,12 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 
 def save_model(model, model_filepath):
-    
+    """
+    save model as pickle file
+    :param model: input of model wanted to save as pickle
+    :param model_filepath: path were we want to save the pickle file
+    :return:
+    """
     with open(model_filepath, 'wb') as file:
         pickle.dump(model, file)
     
