@@ -1,4 +1,4 @@
-# Disaster Response Pipeline Project
+# Disaster Response Pipeline
 
 ### Instructions:
 1. Run the following commands in the project's root directory to set up your database and model.
@@ -11,4 +11,11 @@
 2. Run the following command in the app's directory to run your web app.
     `python run.py`
 
-3. Go to http://0.0.0.0:3001/
+3. Go to http://0.0.0.0:3001/ or http://localhost:3001
+
+![Overvie](Overview.png)
+
+### To-Dos:
+- Imbalance in dataset need to be resolved through resampling / oversampling / undersampling
+- add other charts
+- change output site
