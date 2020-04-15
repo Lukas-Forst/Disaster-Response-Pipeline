@@ -19,10 +19,14 @@ def clean_data(df):
     :param df: input dataframe which needs to be cleaned
     :return: cleaned df
     """
+    # split categories into columns
     categories = df['categories'].str.split(";",expand=True)
+    # select only the first row
     row = categories.iloc[0]
+    # cuts of ending of numbers in every row
     row = row.apply(lambda x: x[:-2])
     category_colnames = row
+    # change columnnname to row 
     categories.columns = category_colnames
     for column in categories:
 
