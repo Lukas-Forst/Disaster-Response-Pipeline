@@ -42,7 +42,7 @@ run.py:
 
 3. Go to http://0.0.0.0:3001/ or http://localhost:3001
 
-![Overvie](Overview.png)
+![Overvie](Overview1.png)
 
 ### To-Dos:
 - Imbalance in dataset need to be resolved through resampling / oversampling / undersampling
