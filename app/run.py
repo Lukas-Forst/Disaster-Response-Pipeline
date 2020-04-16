@@ -39,14 +39,18 @@ model = joblib.load("../models/classifier.pkl")
 def index():
     
     # extract data needed for visuals
-    # TODO: Below is an example - modify to extract data for your own visuals
+
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
 
-    category_names = df.iloc[:, 4:].columns
-    category_boolean = (df.iloc[:, 4:] != 0).sum().values
+
+    category_boolean = (df.iloc[:, 4:] != 0).mean().sort_values(ascending=False)
+    category_names = list(category_boolean.index)
+    #Top 5 Ccategories
+    category_top_5 = (df.iloc[:, 4:] != 0).sum().sort_values(ascending=False)[1:8]
+    category_name_top = list(category_top_5.index)
     # create visuals
-    # TODO: Below is an example - modify to create your own visuals
+
     graphs = [
         {
             'data': [
@@ -63,10 +67,8 @@ def index():
                 },
                 'xaxis': {
                     'title': "Genre"
-                },
-                'marker':{
-                    'color':'#19d3f3'
                 }
+
 
             }
         },
@@ -74,7 +76,8 @@ def index():
             'data': [
                 Bar(
                     x=category_names,
-                    y=category_boolean
+                    y=category_boolean,
+                    marker = dict(color='#19d3f3')
                 )
             ],
 
@@ -88,7 +91,28 @@ def index():
                     'tickangle': 35
                 }
             }
+        },
+        {
+            'data': [
+                Bar(
+                    x=category_name_top,
+                    y=category_top_5,
+                    marker = dict(color='#006400')
+                )
+            ],
+
+            'layout': {
+                'title': 'Top Categories excluding related',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': "Category",
+                    'tickangle': 35
+                }
+            }
         }
+
     ]
     
     # encode plotly graphs in JSON
